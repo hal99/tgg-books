@@ -2149,7 +2149,7 @@
     ],
     "samples": [],
     "cover": "data/表紙/書籍6.jpg",
-    "status": "available"
+    "status": "lowstock"
   },
   {
     "id": 7,
@@ -2639,7 +2639,7 @@
       "data/sample/書籍8.jpg"
     ],
     "cover": "data/表紙/書籍8.jpg",
-    "status": "preorder"
+    "status": "available"
   },
   {
     "id": 9,
@@ -2669,6 +2669,6 @@
     "games": [],
     "samples": [],
     "cover": "data/表紙/書籍10.jpg",
-    "status": "preorder"
+    "status": "available"
   }
 ]
