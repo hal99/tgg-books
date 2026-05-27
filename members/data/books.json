@@ -2,7 +2,7 @@
   {
     "id": 1,
     "series": "レビューブック",
-    "title": "TGG BOOK",
+    "title": "ボードゲームレビューブック",
     "subtitle": "vol.01",
     "size": "A5",
     "pages": 72,
@@ -63,7 +63,7 @@
   {
     "id": 2,
     "series": "レビューブック",
-    "title": "TGG BOOK",
+    "title": "ボードゲームレビューブック",
     "subtitle": "vol.02",
     "size": "A5",
     "pages": 100,
@@ -129,7 +129,7 @@
   {
     "id": 3,
     "series": "レビューブック",
-    "title": "TGG BOOK",
+    "title": "ボードゲームレビューブック",
     "subtitle": "vol.03",
     "size": "A5",
     "pages": 86,
@@ -190,7 +190,7 @@
   {
     "id": 4,
     "series": "レビューブック",
-    "title": "TGG BOOK",
+    "title": "ボードゲームレビューブック",
     "subtitle": "vol.04",
     "size": "A5",
     "pages": 88,
@@ -251,7 +251,7 @@
   {
     "id": 5,
     "series": "レビューブック",
-    "title": "TGG BOOK",
+    "title": "ボードゲームレビューブック",
     "subtitle": "vol.05",
     "size": "A5",
     "pages": 86,
@@ -309,7 +309,7 @@
   {
     "id": 6,
     "series": "レビューブック",
-    "title": "TGG BOOK",
+    "title": "ボードゲームレビューブック",
     "subtitle": "vol.06（一般版）",
     "size": "A5",
     "pages": 72,
@@ -355,7 +355,7 @@
   {
     "id": 7,
     "series": "レビューブック",
-    "title": "TGG BOOK",
+    "title": "ボードゲームレビューブック",
     "subtitle": "vol.07（限定版）",
     "size": "A5",
     "pages": 76,
@@ -398,7 +398,7 @@
   {
     "id": 8,
     "series": "レビューブック",
-    "title": "TGG BOOK",
+    "title": "ボードゲームレビューブック",
     "subtitle": "vol.08（限定版）",
     "size": "A5",
     "pages": 72,
@@ -444,7 +444,7 @@
   {
     "id": 9,
     "series": "このボードゲームが凄い",
-    "title": "このボードゲームが凄い！",
+    "title": "このボードゲームが凄い",
     "subtitle": "2025年版",
     "size": "A5",
     "pages": 60,
@@ -459,7 +459,7 @@
   {
     "id": 10,
     "series": "このボードゲームが凄い",
-    "title": "このボードゲームが凄い！",
+    "title": "このボードゲームが凄い",
     "subtitle": "2026年版(限定版)",
     "size": "A5",
     "pages": 64,
