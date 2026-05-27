@@ -149,9 +149,10 @@
       padding: 0.2rem 0.5rem;
       border-radius: 2px;
     }
-    .badge-instock  { background: var(--gold); color: #0e0e1a; }
-    .badge-preorder { background: #3a7abf; color: #fff; }
-    .badge-soldout  { background: #333; color: #888; }
+    .badge-instock   { background: var(--gold); color: #0e0e1a; }
+    .badge-lowstock  { background: #bf6a2a; color: #fff; }
+    .badge-preorder  { background: #3a7abf; color: #fff; }
+    .badge-soldout   { background: #333; color: #888; }
 
     .sold-overlay {
       position: absolute;
@@ -309,8 +310,9 @@
       font-weight: bold;
       color: var(--gold);
     }
-    .modal-stock.soldout  { color: var(--text-dim); }
-    .modal-stock.preorder { color: #3a7abf; }
+    .modal-stock.soldout   { color: var(--text-dim); }
+    .modal-stock.lowstock  { color: #bf6a2a; }
+    .modal-stock.preorder  { color: #3a7abf; }
 
     .modal-description {
       font-size: 0.85rem;
@@ -494,14 +496,15 @@
   function renderBooks(books) {
     grid.innerHTML = '';
     books.forEach(b => {
-      const sold     = b.status === 'soldout';
-      const preorder = b.status === 'preorder';
+      const sold      = b.status === 'soldout';
+      const preorder  = b.status === 'preorder';
+      const lowstock  = b.status === 'lowstock';
       const card = document.createElement('article');
       card.className = 'book-card' + (sold ? ' sold-out' : '');
       card.dataset.id = b.id;
 
-      const badgeClass = sold ? 'badge-soldout' : preorder ? 'badge-preorder' : 'badge-instock';
-      const badgeText  = sold ? 'SOLD OUT' : preorder ? '予約受付中' : stockLabel(b.stock);
+      const badgeClass = sold ? 'badge-soldout' : preorder ? 'badge-preorder' : lowstock ? 'badge-lowstock' : 'badge-instock';
+      const badgeText  = sold ? 'SOLD OUT' : preorder ? '予約受付中' : lowstock ? '在庫僅少' : stockLabel(b.stock);
       const btnText    = preorder ? '予約する →' : 'Boothで購入する →';
 
       card.innerHTML = `
@@ -533,6 +536,7 @@
   function openModal(b) {
     const sold     = b.status === 'soldout';
     const preorder = b.status === 'preorder';
+    const lowstock = b.status === 'lowstock';
 
     document.getElementById('mCover').src = b.cover;
     document.getElementById('mCover').alt = b.title;
@@ -542,8 +546,8 @@
       `<span>${b.size}</span><span>${b.pages}ページ</span>`;
 
     const stockEl = document.getElementById('mStock');
-    stockEl.textContent = sold ? '完売' : preorder ? '予約受付中' : stockLabel(b.stock);
-    stockEl.className   = 'modal-stock' + (sold ? ' soldout' : preorder ? ' preorder' : '');
+    stockEl.textContent = sold ? '完売' : preorder ? '予約受付中' : lowstock ? '在庫僅少' : stockLabel(b.stock);
+    stockEl.className   = 'modal-stock' + (sold ? ' soldout' : preorder ? ' preorder' : lowstock ? ' lowstock' : '');
 
     const descEl = document.getElementById('mDesc');
     descEl.innerHTML = b.description ? b.description.replace(/\n/g, '<br>') : '';
@@ -625,7 +629,7 @@
   /* ── タブ ── */
   function applyFilter(f) {
     if (f === 'all')    return allBooks;
-    if (f === 'active') return allBooks.filter(b => b.status === 'available' || b.status === 'preorder');
+    if (f === 'active') return allBooks.filter(b => b.status === 'available' || b.status === 'preorder' || b.status === 'lowstock');
     return allBooks.filter(b => b.series === f);
   }
 
