@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Game Gallery — 会員向け書籍一覧</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0e0e1a;
+      --surface:   #1a1a2e;
+      --border:    #2e2e4a;
+      --gold:      #c9a84c;
+      --gold-dim:  #7a6330;
+      --text:      #e8e0d0;
+      --text-dim:  #8a8070;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── ヘッダー ── */
+    header {
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 2px;
+      background: var(--gold);
+      margin: 1rem auto 0;
+    }
+    .site-name {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.6rem, 5vw, 2.6rem);
+      color: var(--gold);
+      letter-spacing: 0.08em;
+    }
+    .site-tagline {
+      margin-top: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      letter-spacing: 0.15em;
+    }
+    .member-badge {
+      display: inline-block;
+      margin-top: 0.6rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold-dim);
+      padding: 0.2rem 0.8rem;
+      border-radius: 2px;
+    }
+
+    /* ── トップナビ ── */
+    nav.topnav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.2rem 1rem 0;
+    }
+    nav.topnav a {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 0.35rem 1rem;
+      border-radius: 2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    nav.topnav a:hover { color: var(--text); border-color: var(--gold-dim); }
+    nav.topnav a.active { color: var(--gold); border-color: var(--gold); }
+
+    /* ── タブ ── */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 2rem 1rem 1rem;
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.5rem 1.4rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .tab-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    .tab-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #0e0e1a;
+      font-weight: bold;
+    }
+
+    /* ── グリッド ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 4rem;
+    }
+
+    /* ── 書籍カード ── */
+    .book-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .book-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    }
+    .book-card.sold-out { opacity: 0.6; }
+
+    .cover-wrap {
+      position: relative;
+      aspect-ratio: 5 / 7;
+      overflow: hidden;
+      background: #111;
+    }
+    .cover-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+    .book-card:hover .cover-wrap img { transform: scale(1.03); }
+
+    .badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 2px;
+    }
+    .badge-instock   { background: var(--gold); color: #0e0e1a; }
+    .badge-lowstock  { background: #bf6a2a; color: #fff; }
+    .badge-preorder  { background: #3a7abf; color: #fff; }
+    .badge-soldout   { background: #333; color: #888; }
+
+    .sold-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sold-overlay span {
+      font-family: Georgia, serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      color: #888;
+      border: 1px solid #555;
+      padding: 0.3rem 0.8rem;
+      background: rgba(0,0,0,0.6);
+    }
+
+    .detail-hint {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(201,168,76,0.9);
+      color: #0e0e1a;
+      font-size: 0.7rem;
+      font-weight: bold;
+      text-align: center;
+      padding: 0.3rem;
+      letter-spacing: 0.08em;
+      transform: translateY(100%);
+      transition: transform 0.2s;
+    }
+    .book-card:hover .detail-hint { transform: translateY(0); }
+
+    .card-body {
+      padding: 0.85rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .card-subtitle { font-size: 0.72rem; color: var(--gold); letter-spacing: 0.08em; }
+    .card-title { font-size: 0.88rem; font-weight: bold; line-height: 1.4; }
+    .card-meta { font-size: 0.72rem; color: var(--text-dim); margin-top: auto; padding-top: 0.5rem; }
+
+    .btn-booth {
+      display: block;
+      margin: 0.6rem 0.85rem 0.85rem;
+      text-align: center;
+      background: var(--gold);
+      color: #0e0e1a;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      padding: 0.5rem;
+      border-radius: 2px;
+      transition: opacity 0.2s;
+    }
+    .btn-booth:hover { opacity: 0.85; }
+
+    /* ── モーダル ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      overflow-y: auto;
+      padding: 2rem 1rem;
+    }
+    .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 860px;
+      position: relative;
+      overflow: hidden;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .modal-close:hover { color: var(--text); border-color: var(--gold-dim); }
+
+    .modal-header {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+    }
+    @media (max-width: 560px) {
+      .modal-header { grid-template-columns: 1fr; }
+    }
+
+    .modal-cover {
+      aspect-ratio: 5 / 7;
+      overflow: hidden;
+      background: #111;
+    }
+    .modal-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .modal-info {
+      padding: 2rem 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .modal-subtitle { font-size: 0.8rem; color: var(--gold); letter-spacing: 0.1em; }
+    .modal-title {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      font-weight: bold;
+      line-height: 1.4;
+    }
+    .modal-meta {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .modal-stock { font-size: 0.85rem; font-weight: bold; color: var(--gold); }
+    .modal-stock.soldout   { color: var(--text-dim); }
+    .modal-stock.lowstock  { color: #bf6a2a; }
+    .modal-stock.preorder  { color: #3a7abf; }
+
+    .modal-description {
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--text-dim);
+      flex: 1;
+    }
+
+    .modal-booth {
+      display: inline-block;
+      background: var(--gold);
+      color: #0e0e1a;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      padding: 0.6rem 1.4rem;
+      border-radius: 2px;
+      transition: opacity 0.2s;
+      align-self: flex-start;
+    }
+    .modal-booth:hover { opacity: 0.85; }
+
+    .modal-body {
+      padding: 0 2rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .modal-section-title {
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.12em;
+      margin-bottom: 0.6rem;
+      text-transform: uppercase;
+    }
+
+    .games-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .games-table th {
+      text-align: left;
+      color: var(--gold-dim);
+      font-weight: normal;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .games-table td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid rgba(46,46,74,0.5);
+      color: var(--text-dim);
+      vertical-align: middle;
+    }
+    .games-table tr:hover td { background: rgba(201,168,76,0.04); }
+    .games-table .td-title { color: var(--text); }
+    .games-table .td-page  { color: var(--gold-dim); width: 2.5rem; text-align: right; }
+    .games-table .td-weight { white-space: nowrap; font-size: 0.68rem; }
+    .weight-light  { color: #7abf8a; }
+    .weight-medium { color: #c9a84c; }
+    .weight-heavy  { color: #c97a7a; }
+
+    .sample-gallery {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .sample-gallery a {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .sample-gallery a:hover { border-color: var(--gold); }
+    .sample-gallery img { width: 160px; height: auto; display: block; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--gold-dim); text-decoration: none; }
+    footer a:hover { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="site-name">The Game Gallery</div>
+  <div class="site-tagline">MEMBER BOOKS — 会員向け書籍一覧 &amp; 在庫状況</div>
+  <div class="member-badge">MEMBER ONLY</div>
+</header>
+
+<nav class="topnav">
+  <a href="index.html" class="active">書籍一覧</a>
+  <a href="titles.html">収録タイトル一覧</a>
+</nav>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-filter="active">取り扱い中</button>
+  <button class="tab-btn" data-filter="all">すべて</button>
+  <button class="tab-btn" data-filter="review">レビューブック</button>
+  <button class="tab-btn" data-filter="sugoi">このボードゲームが凄い</button>
+</nav>
+
+<main class="grid" id="grid"></main>
+
+<!-- 詳細モーダル -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modalClose" aria-label="閉じる">✕</button>
+
+    <div class="modal-header">
+      <div class="modal-cover">
+        <img id="mCover" src="" alt="">
+      </div>
+      <div class="modal-info">
+        <div id="mSubtitle" class="modal-subtitle"></div>
+        <div id="mTitle" class="modal-title"></div>
+        <div id="mMeta" class="modal-meta"></div>
+        <div id="mStock" class="modal-stock"></div>
+        <p id="mDesc" class="modal-description"></p>
+        <a id="mBooth" class="modal-booth" href="#" target="_blank" rel="noopener" style="display:none">
+          Boothで購入する →
+        </a>
+      </div>
+    </div>
+
+    <div class="modal-body" id="mBody" style="display:none">
+      <div id="mGamesSection" style="display:none">
+        <div class="modal-section-title">収録タイトル</div>
+        <div class="games-tags" id="mGames"></div>
+      </div>
+      <div id="mSamplesSection" style="display:none">
+        <div class="modal-section-title">サンプルページ</div>
+        <div class="sample-gallery" id="mSamples"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  &copy; The Game Gallery &nbsp;|&nbsp;
+  <a href="https://thegamegallery.booth.pm/" target="_blank" rel="noopener">Booth ストア</a>
+</footer>
+
+<script>
+  const grid       = document.getElementById('grid');
+  const overlay    = document.getElementById('modalOverlay');
+  const modalClose = document.getElementById('modalClose');
+  let allBooks = [];
+
+  function stockLabel(n) {
+    if (n <= 0)  return '完売';
+    if (n <= 10) return `残り${n}冊`;
+    return '在庫あり';
+  }
+
+  function renderBooks(books) {
+    grid.innerHTML = '';
+    books.forEach(b => {
+      const sold     = b.status === 'soldout';
+      const preorder = b.status === 'preorder';
+      const lowstock = b.status === 'lowstock';
+      const card = document.createElement('article');
+      card.className = 'book-card' + (sold ? ' sold-out' : '');
+      card.dataset.id = b.id;
+
+      const badgeClass = sold ? 'badge-soldout' : preorder ? 'badge-preorder' : lowstock ? 'badge-lowstock' : 'badge-instock';
+      const badgeText  = sold ? 'SOLD OUT' : preorder ? '予約受付中' : lowstock ? '在庫僅少' : stockLabel(b.stock);
+      const btnText    = preorder ? '予約する →' : 'Boothで購入する →';
+
+      card.innerHTML = `
+        <div class="cover-wrap">
+          <img src="${b.cover}" alt="${b.title} ${b.subtitle}" loading="lazy">
+          <span class="badge ${badgeClass}">${badgeText}</span>
+          ${sold ? '<div class="sold-overlay"><span>SOLD OUT</span></div>' : ''}
+          <div class="detail-hint">詳細を見る</div>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle">${b.subtitle}</div>
+          <div class="card-title">${b.title}</div>
+          <div class="card-meta">${b.size} / ${b.pages}ページ</div>
+        </div>
+        ${(!sold && b.boothUrl) ? `<a class="btn-booth" href="${b.boothUrl}" target="_blank" rel="noopener">${btnText}</a>` : ''}
+      `;
+
+      card.addEventListener('click', e => {
+        if (e.target.closest('.btn-booth')) return;
+        openModal(b);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  function openModal(b) {
+    const sold     = b.status === 'soldout';
+    const preorder = b.status === 'preorder';
+    const lowstock = b.status === 'lowstock';
+
+    document.getElementById('mCover').src = b.cover;
+    document.getElementById('mCover').alt = b.title;
+    document.getElementById('mSubtitle').textContent = b.subtitle;
+    document.getElementById('mTitle').textContent    = b.title;
+    document.getElementById('mMeta').innerHTML = `<span>${b.size}</span><span>${b.pages}ページ</span>`;
+
+    const stockEl = document.getElementById('mStock');
+    stockEl.textContent = sold ? '完売' : preorder ? '予約受付中' : lowstock ? '在庫僅少' : stockLabel(b.stock);
+    stockEl.className   = 'modal-stock' + (sold ? ' soldout' : preorder ? ' preorder' : lowstock ? ' lowstock' : '');
+
+    const descEl = document.getElementById('mDesc');
+    descEl.innerHTML = b.description ? b.description.replace(/\n/g, '<br>') : '';
+    descEl.style.display = b.description ? '' : 'none';
+
+    const boothEl = document.getElementById('mBooth');
+    if (!sold && b.boothUrl) {
+      boothEl.href        = b.boothUrl;
+      boothEl.textContent = preorder ? '予約する →' : 'Boothで購入する →';
+      boothEl.style.display = '';
+    } else {
+      boothEl.style.display = 'none';
+    }
+
+    const gamesSection = document.getElementById('mGamesSection');
+    const gamesEl      = document.getElementById('mGames');
+    if (b.games && b.games.length > 0) {
+      const weightClass = w =>
+        w === '軽量級' ? 'weight-light' : w === '重量級' ? 'weight-heavy' : 'weight-medium';
+      const isObj = typeof b.games[0] === 'object';
+      if (isObj) {
+        const rows = b.games
+          .slice().sort((a, z) => a.page - z.page)
+          .map(g => `
+            <tr>
+              <td class="td-page">${g.page}</td>
+              <td class="td-title">${g.title}</td>
+              <td>${g.players}</td>
+              <td>${g.time}</td>
+              <td>${g.year || '—'}</td>
+              <td class="td-weight ${weightClass(g.weight)}">${g.weight}</td>
+            </tr>`).join('');
+        gamesEl.innerHTML = `
+          <table class="games-table">
+            <thead><tr>
+              <th>ページ</th><th>タイトル</th><th>人数</th><th>時間</th><th>年</th><th>難易度</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      } else {
+        gamesEl.innerHTML = `<div class="games-tags">${b.games.map(g => `<span>${g}</span>`).join('')}</div>`;
+      }
+      gamesSection.style.display = '';
+    } else {
+      gamesSection.style.display = 'none';
+    }
+
+    const samplesSection = document.getElementById('mSamplesSection');
+    const samplesEl      = document.getElementById('mSamples');
+    if (b.samples && b.samples.length > 0) {
+      samplesEl.innerHTML = b.samples.map(s =>
+        `<a href="${s}" target="_blank" rel="noopener"><img src="${s}" alt="サンプルページ" loading="lazy"></a>`
+      ).join('');
+      samplesSection.style.display = '';
+    } else {
+      samplesSection.style.display = 'none';
+    }
+
+    const hasBody = (b.games && b.games.length > 0) || (b.samples && b.samples.length > 0);
+    document.getElementById('mBody').style.display = hasBody ? '' : 'none';
+
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  modalClose.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  function applyFilter(f) {
+    if (f === 'all')    return allBooks;
+    if (f === 'active') return allBooks.filter(b => b.status === 'available' || b.status === 'preorder' || b.status === 'lowstock');
+    return allBooks.filter(b => b.series === f);
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderBooks(applyFilter(btn.dataset.filter));
+    });
+  });
+
+  fetch('data/books.json')
+    .then(r => r.json())
+    .then(data => {
+      allBooks = data;
+      renderBooks(applyFilter('active'));
+      const m = window.location.hash.match(/^#book-(\d+)$/);
+      if (m) {
+        const book = allBooks.find(b => b.id === parseInt(m[1]));
+        if (book) openModal(book);
+      }
+    })
+    .catch(() => {
+      grid.innerHTML = '<p style="color:var(--text-dim);padding:2rem">データの読み込みに失敗しました。</p>';
+    });
+</script>
+</body>
+</html>

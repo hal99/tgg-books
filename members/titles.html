@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>収録タイトル一覧 — The Game Gallery (会員向け)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0e0e1a;
+      --surface:  #1a1a2e;
+      --border:   #2e2e4a;
+      --gold:     #c9a84c;
+      --gold-dim: #7a6330;
+      --text:     #e8e0d0;
+      --text-dim: #8a8070;
+      --light:    #7abf8a;
+      --medium:   #c9a84c;
+      --heavy:    #c97a7a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── ヘッダー ── */
+    header {
+      text-align: center;
+      padding: 2.5rem 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 2px;
+      background: var(--gold);
+      margin: 1rem auto 0;
+    }
+    .site-name {
+      font-family: Georgia, serif;
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      color: var(--gold);
+      letter-spacing: 0.08em;
+    }
+    .page-title {
+      margin-top: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      letter-spacing: 0.15em;
+    }
+    .member-badge {
+      display: inline-block;
+      margin-top: 0.6rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold-dim);
+      padding: 0.2rem 0.8rem;
+      border-radius: 2px;
+    }
+
+    /* ── ナビ ── */
+    nav.topnav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.2rem 1rem 0;
+    }
+    nav.topnav a {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 0.35rem 1rem;
+      border-radius: 2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    nav.topnav a:hover { color: var(--text); border-color: var(--gold-dim); }
+    nav.topnav a.active { color: var(--gold); border-color: var(--gold); }
+
+    /* ── コントロール ── */
+    .controls {
+      max-width: 900px;
+      margin: 1.5rem auto 0;
+      padding: 0 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .search-wrap::before {
+      content: '🔍';
+      position: absolute;
+      left: 0.7rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      pointer-events: none;
+    }
+    #searchInput {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 0.75rem 0.5rem 2.2rem;
+      font-size: 0.85rem;
+      border-radius: 2px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #searchInput:focus { border-color: var(--gold-dim); }
+    #searchInput::placeholder { color: var(--text-dim); }
+
+    .sort-btns {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .sort-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.4rem 0.9rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .sort-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+    .sort-btn.active { background: var(--gold); border-color: var(--gold); color: #0e0e1a; font-weight: bold; }
+
+    /* ── 集計 ── */
+    .stats {
+      max-width: 900px;
+      margin: 0.8rem auto 0;
+      padding: 0 1.5rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* ── テーブル ── */
+    .table-wrap {
+      max-width: 900px;
+      margin: 1rem auto 4rem;
+      padding: 0 1.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead th {
+      text-align: left;
+      font-size: 0.72rem;
+      color: var(--gold-dim);
+      font-weight: normal;
+      letter-spacing: 0.08em;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(46,46,74,0.4);
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: rgba(201,168,76,0.04); }
+
+    td {
+      padding: 0.55rem 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      vertical-align: middle;
+    }
+    .td-title { color: var(--text); font-size: 0.9rem; }
+    .td-players, .td-time { white-space: nowrap; }
+    .td-year { white-space: nowrap; }
+
+    .weight-badge {
+      font-size: 0.68rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+    .weight-light  { background: rgba(122,191,138,0.15); color: var(--light); }
+    .weight-medium { background: rgba(201,168,76,0.12);  color: var(--medium); }
+    .weight-heavy  { background: rgba(201,122,122,0.15); color: var(--heavy); }
+
+    /* 書籍バッジ */
+    .book-badges { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .book-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 2px;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+      cursor: pointer;
+    }
+    .book-badge:hover {
+      background: var(--gold);
+      color: #0e0e1a;
+    }
+
+    /* 検索ヒットなし */
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    /* フッター */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--gold-dim); text-decoration: none; }
+    footer a:hover { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="site-name">The Game Gallery</div>
+  <div class="page-title">収録タイトル一覧</div>
+  <div class="member-badge">MEMBER ONLY</div>
+</header>
+
+<nav class="topnav">
+  <a href="index.html">← 書籍一覧</a>
+  <a href="titles.html" class="active">収録タイトル一覧</a>
+</nav>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="search" id="searchInput" placeholder="タイトルで検索…">
+  </div>
+  <div class="sort-btns">
+    <button class="sort-btn active" data-sort="title">タイトル順</button>
+    <button class="sort-btn" data-sort="year">発売年順</button>
+    <button class="sort-btn" data-sort="weight">難易度順</button>
+  </div>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>タイトル</th>
+        <th>人数</th>
+        <th>時間</th>
+        <th>発売年</th>
+        <th>難易度</th>
+        <th>掲載書籍</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="no-results" id="noResults" style="display:none">該当するタイトルが見つかりませんでした。</div>
+</div>
+
+<footer>
+  &copy; The Game Gallery &nbsp;|&nbsp;
+  <a href="https://thegamegallery.booth.pm/" target="_blank" rel="noopener">Booth ストア</a>
+</footer>
+
+<script>
+  const tbody     = document.getElementById('tbody');
+  const statsEl   = document.getElementById('stats');
+  const searchEl  = document.getElementById('searchInput');
+  const noResults = document.getElementById('noResults');
+
+  const weightOrder = { '軽量級': 0, '中量級': 1, '重量級': 2 };
+  const weightClass = w =>
+    w === '軽量級' ? 'weight-light' : w === '重量級' ? 'weight-heavy' : 'weight-medium';
+
+  let allEntries = []; // { game, book }
+  let currentSort = 'title';
+  let currentQuery = '';
+
+  /* ── データ読み込み ── */
+  fetch('data/books.json')
+    .then(r => r.json())
+    .then(books => {
+      /* 全書籍のゲームをフラット化（タイトルキーでグループ化） */
+      const map = new Map();
+      books.forEach(book => {
+        if (!book.games || book.games.length === 0) return;
+        book.games.forEach(g => {
+          if (typeof g !== 'object') return;
+          const key = g.title.trim();
+          if (!map.has(key)) {
+            map.set(key, { game: g, books: [] });
+          }
+          map.get(key).books.push(book);
+        });
+      });
+
+      allEntries = Array.from(map.values());
+      statsEl.textContent = `全 ${allEntries.length} タイトル（${books.filter(b => b.games && b.games.length > 0).length} 冊分）`;
+      render();
+    })
+    .catch(() => {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-dim);padding:2rem">データの読み込みに失敗しました。</td></tr>';
+    });
+
+  /* ── 描画 ── */
+  function render() {
+    const q = currentQuery.trim().toLowerCase();
+    let list = q
+      ? allEntries.filter(e => e.game.title.toLowerCase().includes(q))
+      : allEntries.slice();
+
+    list = sort(list, currentSort);
+
+    noResults.style.display = list.length === 0 ? '' : 'none';
+    tbody.innerHTML = list.map(e => {
+      const g = e.game;
+      const badges = e.books.map(b =>
+        `<a class="book-badge" href="index.html#book-${b.id}" title="${b.title} ${b.subtitle}">Vol.${b.id}</a>`
+      ).join('');
+      return `
+        <tr>
+          <td class="td-title">${g.title}</td>
+          <td class="td-players">${g.players}</td>
+          <td class="td-time">${g.time}</td>
+          <td class="td-year">${g.year || '—'}</td>
+          <td><span class="weight-badge ${weightClass(g.weight)}">${g.weight}</span></td>
+          <td><div class="book-badges">${badges}</div></td>
+        </tr>`;
+    }).join('');
+  }
+
+  function sort(list, key) {
+    return list.slice().sort((a, z) => {
+      switch (key) {
+        case 'year':   return (a.game.year || 9999) - (z.game.year || 9999);
+        case 'weight': return weightOrder[a.game.weight] - weightOrder[z.game.weight];
+        default:       return a.game.title.localeCompare(z.game.title, 'ja');
+      }
+    });
+  }
+
+  /* ── 検索 ── */
+  searchEl.addEventListener('input', e => {
+    currentQuery = e.target.value;
+    render();
+  });
+
+  /* ── ソート ── */
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSort = btn.dataset.sort;
+      render();
+    });
+  });
+</script>
+</body>
+</html>
