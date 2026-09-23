@@ -1902,7 +1902,7 @@
     "subtitle": "2025年春号",
     "size": "A5",
     "pages": 72,
-    "stock": 55,
+    "stock": 0,
     "boothUrl": "https://thegamegallery.booth.pm/items/6868711",
     "description": "",
     "games": [
@@ -2149,7 +2149,7 @@
     ],
     "samples": [],
     "cover": "data/表紙/書籍6.jpg",
-    "status": "lowstock"
+    "status": "soldout"
   },
   {
     "id": 7,
@@ -2669,6 +2669,21 @@
     "games": [],
     "samples": [],
     "cover": "data/表紙/書籍10.jpg",
+    "status": "available"
+  },
+    {
+    "id": 11,
+    "series": "review",
+    "title": "ボードゲームレビューブック Vol.9",
+    "subtitle": "2026年秋号",
+    "size": "A5",
+    "pages": 72,
+    "stock": 100,
+    "boothUrl": "https://thegamegallery.booth.pm/items/8890578",
+    "description": "",
+    "games": [],
+    "samples": [],
+    "cover": "data/表紙/書籍11.jpg",
     "status": "available"
   }
 ]
